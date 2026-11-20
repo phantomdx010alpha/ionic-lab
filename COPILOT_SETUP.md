@@ -82,7 +82,7 @@ If you get a 404 for `atlas.dat`, `meta.json` or `three.min.js`, a file is missi
 ## Updating later
 
 1. Replace or edit the files.
-2. In `sw.js`, bump the version string `ionic-lab-v2` to `ionic-lab-v3` (and so on), so installed copies refresh.
+2. In `sw.js`, bump the version string `ionic-lab-v4` to `ionic-lab-v5` (and so on), so installed copies refresh.
 3. Commit to `main`. On the phone, fully close and reopen the app once.
 
 ## Troubleshooting
