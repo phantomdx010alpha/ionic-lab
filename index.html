@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Ionic Lab</title>
+<meta name="theme-color" content="#02070d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ionic Lab">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<script src="three.min.js"></script>
+<style>
+:root{--bg:#02070d;--pn:rgba(3,18,28,.88);--ln:rgba(0,229,255,.3);--tx:#c4f6ff;--dim:#5fa7b8;--ac:#00e5ff;--dock:58px;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#02070d}}
+:root[data-theme="dark"]{--bg:#02070d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%}
+body{color:var(--tx);font:13px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-user-select:none;user-select:none}
+#app{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,#073049 0%,#02070d 72%)}
+#gl,#gl canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#app::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,229,255,.03) 0 1px,transparent 1px 3px)}
+#top{position:absolute;top:0;left:0;right:0;padding:calc(var(--sat) + 8px) 14px 6px;display:flex;justify-content:space-between;align-items:baseline;pointer-events:none;z-index:3}
+#top b{color:var(--ac);letter-spacing:.24em;font-size:12px;text-shadow:0 0 10px var(--ac)}#top span{color:var(--dim);font-size:10px;letter-spacing:.12em}
+#chip{position:absolute;left:10px;right:64px;top:calc(var(--sat) + 34px);background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:8px 10px;display:flex;gap:8px;align-items:center;z-index:4;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transform:translateY(-12px);opacity:0;pointer-events:none;transition:.2s}
+#chip.on{transform:none;opacity:1;pointer-events:auto}
+#chip i{width:9px;height:9px;border-radius:50%;flex:none;background:currentColor;box-shadow:0 0 8px currentColor}
+#chip div{flex:1;min-width:0}#chip .n{color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#chip .s{color:var(--dim);font-size:11px}
+.b{background:rgba(0,229,255,.1);color:var(--ac);border:1px solid var(--ln);border-radius:10px;padding:0 11px;height:34px;font:600 11px inherit;font-family:inherit;letter-spacing:.06em;cursor:pointer}
+.b.on{background:rgba(0,229,255,.28);box-shadow:0 0 12px rgba(0,229,255,.45)}
+#side{position:absolute;right:10px;top:50%;transform:translateY(-60%);display:flex;flex-direction:column;gap:8px;z-index:4}
+#side .b{width:44px;height:44px;border-radius:50%;padding:0;font-size:18px;background:var(--pn);display:flex;align-items:center;justify-content:center}
+#dock{position:absolute;left:0;right:0;bottom:0;height:calc(var(--dock) + var(--sab));padding:6px 10px var(--sab);display:flex;gap:8px;background:var(--pn);border-top:1px solid var(--ln);z-index:6;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#dock .b{flex:1;height:44px;font-size:12px}
+#sheet{position:absolute;left:0;right:0;bottom:calc(var(--dock) + var(--sab));height:min(48vh,420px);background:var(--pn);border-top:1px solid var(--ln);border-radius:18px 18px 0 0;z-index:5;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#sheet.on{transform:none}
+.grab{width:38px;height:4px;border-radius:2px;background:var(--ln);margin:8px auto 4px;flex:none}
+.pane{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 14px 14px;touch-action:pan-y}.pane.on{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.c{display:flex;align-items:center;gap:7px;padding:0 10px;height:36px;border:1px solid var(--ln);border-radius:18px;background:rgba(0,229,255,.06);cursor:pointer}
+.c i{width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 7px currentColor}.c em{font-style:normal;color:var(--dim);font-size:10px}.c.off{opacity:.3}
+.pre .b{height:32px}
+input[type=search]{width:100%;height:40px;background:rgba(0,0,0,.45);border:1px solid var(--ln);color:var(--tx);padding:0 12px;border-radius:10px;font:16px inherit;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text}
+#list{margin-top:8px}#list div{padding:10px 6px;border-bottom:1px solid rgba(0,229,255,.1);display:flex;gap:9px;align-items:center}#list i{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.rw{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(0,229,255,.1)}.rw span{color:var(--dim);letter-spacing:.08em;font-size:11px}
+input[type=range]{accent-color:var(--ac);width:55%}
+.seg{display:flex;gap:6px}
+#boot{position:absolute;inset:0;background:var(--bg);z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .6s}
+#boot h1{margin:0;color:var(--ac);letter-spacing:.3em;font-size:17px;text-shadow:0 0 18px var(--ac);text-align:center;line-height:1.5}#boot small{color:var(--dim);letter-spacing:.2em;font-size:10px}
+.bar{width:60%;max-width:260px;height:4px;background:rgba(0,229,255,.15);border-radius:2px;overflow:hidden}.bar u{display:block;height:100%;width:0;background:var(--ac);box-shadow:0 0 10px var(--ac)}
+#toast{position:absolute;left:50%;top:calc(var(--sat) + 80px);transform:translateX(-50%);background:var(--pn);border:1px solid var(--ln);padding:8px 14px;border-radius:20px;z-index:8;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;font-size:12px}#toast.on{opacity:1}
+@media (min-width:700px){#sheet{left:50%;right:auto;width:520px;transform:translate(-50%,105%)}#sheet.on{transform:translate(-50%,0)}}
+#gate{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 50% 35%,#073049 0%,#02070d 70%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(var(--sat) + 24px) 26px calc(var(--sab) + 24px);text-align:center;overflow-y:auto}
+#gate img{width:112px;height:112px;border-radius:26px;box-shadow:0 0 36px rgba(255,60,90,.35)}
+#gate h2{margin:0;color:var(--ac);letter-spacing:.22em;font-size:16px;text-shadow:0 0 14px var(--ac)}
+#gate p{margin:0;color:var(--dim);max-width:320px;line-height:1.55}
+#gate ol{margin:4px 0;padding:0;list-style:none;text-align:left;max-width:320px;display:flex;flex-direction:column;gap:9px}
+#gate li{display:flex;gap:10px;align-items:flex-start;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:10px 12px}#gate li b{color:var(--ac);flex:none}
+#gate .sh{display:inline-block;border:1px solid var(--ac);border-radius:4px;padding:0 5px;color:var(--ac)}
+</style>
+</head>
+<body>
+<div id="gate"><img src="icon-192.png" alt=""><h2>IONIC LAB</h2><p id="gp"></p><ol id="gs"></ol><button class="b" id="gi" style="display:none;height:44px;padding:0 22px">INSTALL APP</button></div>
+<div id="app">
+<div id="gl"></div>
+<div id="top"><b>IONIC LAB</b><span id="st">0 / 0</span></div>
+<div id="chip"><i id="cd"></i><div><div class="n" id="cn"></div><div class="s" id="cs"></div></div><button class="b" id="fc">FOCUS</button><button class="b" id="cx">✕</button></div>
+<div id="side"><button class="b on" id="spin" aria-label="Auto-spin">⟳</button><button class="b" id="iso" aria-label="Isolate">◐</button><button class="b" id="rst" aria-label="Reset">⌂</button></div>
+<div id="sheet"><div class="grab"></div>
+<div class="pane on" id="p0"><div class="chips pre" id="pre"></div><div class="chips" id="sys"></div></div>
+<div class="pane" id="p1"><input id="q" type="search" placeholder="Search bones, muscles, organs…" enterkeyhint="search"><div id="list"></div></div>
+<div class="pane" id="p2">
+<div class="rw"><span>EXPLODE</span><input id="ex" type="range" min="0" max="100" value="0"></div>
+<div class="rw"><span>BRIGHTNESS</span><input id="br" type="range" min="40" max="140" value="100"></div>
+<div class="rw"><span>SCAN BEAM</span><button class="b on" id="beam">ON</button></div>
+<div class="rw"><span>QUALITY</span><div class="seg"><button class="b" data-q="1">LOW</button><button class="b" data-q="1.5">MED</button><button class="b" data-q="2">HIGH</button></div></div>
+<div class="rw"><span>RESET VIEW</span><button class="b" id="rst2">RESET</button></div>
+<div style="color:var(--dim);font-size:10px;margin-top:12px;line-height:1.5">Geometry: BodyParts3D 4.0 © DBCLS, CC BY 4.0, via github.com/ashemag/human-atlas (simplified). Educational visualization, not a clinical tool.</div></div>
+</div>
+<nav id="dock"><button class="b on" data-t="0">LAYERS</button><button class="b" data-t="1">FIND</button><button class="b" data-t="2">VIEW</button></nav>
+<div id="toast"></div>
+<div id="boot"><h1>IONIC<br>LAB</h1><div class="bar"><u id="bar"></u></div><small id="bt">DECODING…</small></div>
+</div>
+<script>
+function start(){let META;
+const SYS=[["skeletal","Skeleton","#f1ead0"],["muscular","Muscular","#ff4a5e"],["arterial","Arterial","#ff9a3c"],["venous","Venous","#4d7dff"],["nervous","Nervous","#ffe94d"],["digestive","Digestive","#7dff9a"],["respiratory","Respiratory","#5ff2ff"],["urinary","Urinary","#c58bff"],["reproductive","Reproductive","#ff7ad9"],["lymphatic","Lymphatic","#a6ffe0"],["endocrine","Endocrine","#ffb0ff"],["integumentary","Skin","#9fb6c4"],["connective","Connective","#d0d8ff"],["sensory","Sensory","#fff"],["cardiac","Cardiac","#ff2a55"]];
+const $=id=>document.getElementById(id),T=THREE;
+const st={get(k,d){try{const v=localStorage.getItem("ion_"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("ion_"+k,JSON.stringify(v))}catch(e){}}};
+const toast=m=>{const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),1800)};
+const host=$("gl"),renderer=new T.WebGLRenderer({antialias:true,alpha:true,powerPreference:"high-performance"});
+let Q=st.get("q",1.5);renderer.setPixelRatio(Math.min(Q,devicePixelRatio||1));host.appendChild(renderer.domElement);
+const scene=new T.Scene(),cam=new T.PerspectiveCamera(32,1,.05,60),pivot=new T.Group(),inner=new T.Group();pivot.add(inner);scene.add(pivot);
+const U={t:{value:0},scan:{value:0},dim:{value:st.get("dim",1)},beam:{value:st.get("beam",1)}};
+const vs=`varying vec3 vN;varying vec3 vW;void main(){vN=normalize(normalMatrix*normal);vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`;
+const fs=`uniform vec3 uCol;uniform float uHi;uniform float uT,uScan,uDim,uBeam;varying vec3 vN;varying vec3 vW;
+void main(){vec3 n=normalize(vN);float d=max(dot(n,normalize(vec3(.35,.55,.75))),0.);float d2=max(dot(n,normalize(vec3(-.6,.2,.4))),0.)*.35;
+float rim=pow(1.-abs(n.z),2.4);vec3 c=uCol*(.28+.72*d+d2)+vec3(0.,.9,1.)*rim*.7;
+float band=smoothstep(.05,0.,abs(vW.y-uScan));c+=vec3(.6,1.,1.)*band*.9*uBeam;
+c*=.94+.06*sin(vW.y*260.+uT*3.)+.03*sin(uT*37.);
+c=mix(c,vec3(1.)*(.75+.25*sin(uT*6.)),uHi*.6);gl_FragColor=vec4(c*uDim,1.);}`;
+const mk=col=>new T.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{uCol:{value:new T.Color(col)},uHi:{value:0},uT:U.t,uScan:U.scan,uDim:U.dim,uBeam:U.beam}});
+const mats=SYS.map(s=>mk(s[2])),selMat=mk("#fff");selMat.uniforms.uHi.value=1;
+const meshes=[],sysCount=SYS.map(()=>0);
+let vis=st.get("vis",SYS.map((s,i)=>i<2)),sel=-1,iso=false,spin=true,ex=0,yaw=.5,pitch=.1,dist=3.4,distG=3.4,base=3.4,center=new T.Vector3(),focused=false,goal=new T.Vector3(),ready=false;
+function renderSys(){$("sys").innerHTML="";SYS.forEach((s,i)=>{if(!sysCount[i])return;const d=document.createElement("div");d.className="c"+(vis[i]?"":" off");d.innerHTML=`<i style="color:${s[2]}"></i>${s[1]}<em>${sysCount[i]}</em>`;d.onclick=()=>{vis[i]=!vis[i];apply();renderSys();list()};$("sys").appendChild(d)})}
+function pre(){$("pre").innerHTML="";[["SKELETON",s=>s==="skeletal"],["MUSCLES",s=>s==="muscular"],["BONE+MUSCLE",s=>s==="skeletal"||s==="muscular"],["ORGANS",s=>!["skeletal","muscular"].includes(s)],["ALL",()=>true]].forEach(([n,f])=>{const b=document.createElement("button");b.className="b";b.textContent=n;b.onclick=()=>{vis=SYS.map(s=>f(s[0]));apply();renderSys();list()};$("pre").appendChild(b)})}
+function apply(){st.set("vis",vis);meshes.forEach((m,i)=>m.visible=vis[m.userData.s]&&(!iso||sel<0||i===sel))}
+function setFocus(on){focused=on&&sel>=0;$("fc").classList.toggle("on",focused);if(focused){const m=meshes[sel],u=m.userData;goal.copy(u.c).add(m.position).multiplyScalar(-1);const sz=Math.max(u.hi[0]-u.lo[0],u.hi[1]-u.lo[1],u.hi[2]-u.lo[2]);distG=Math.max(.35,Math.min(base,sz*2.6+.25))}else{goal.copy(center).multiplyScalar(-1);distG=base}}
+function select(i){if(sel>=0)meshes[sel].material=mats[meshes[sel].userData.s];sel=i;if(i<0){$("chip").classList.remove("on");setFocus(false);apply();return}
+const m=meshes[i],u=m.userData;selMat.uniforms.uCol.value.set(SYS[u.s][2]);m.material=selMat;
+const b=u.hi.map((v,k)=>((v-u.lo[k])*100).toFixed(1));$("cd").style.color=SYS[u.s][2];$("cn").textContent=u.name;$("cs").textContent=`${SYS[u.s][1]} · ${b[0]}×${b[1]}×${b[2]} cm · ${u.id}`;$("chip").classList.add("on");
+if(focused)setFocus(true);apply()}
+function list(){const q=$("q").value.trim().toLowerCase();let n=0;$("list").innerHTML="";for(let i=0;i<meshes.length&&n<60;i++){const u=meshes[i].userData;if(!vis[u.s])continue;if(q&&!u.name.toLowerCase().includes(q)&&u.id.toLowerCase()!==q)continue;n++;const d=document.createElement("div");d.innerHTML=`<i style="color:${SYS[u.s][2]}"></i>${u.name}`;d.onclick=()=>{select(i);setFocus(true);sheet(-1)};$("list").appendChild(d)}if(!n)$("list").innerHTML='<div style="color:var(--dim)">No match in visible layers</div>'}
+$("q").oninput=list;
+$("fc").onclick=()=>setFocus(!focused);$("cx").onclick=()=>select(-1);
+$("spin").onclick=e=>{spin=!spin;e.currentTarget.classList.toggle("on",spin)};
+$("iso").onclick=e=>{if(sel<0&&!iso){toast("Tap a part first");return}iso=!iso;e.currentTarget.classList.toggle("on",iso);apply()};
+function reset(){yaw=.5;pitch=.1;ex=0;$("ex").value=0;meshes.forEach(m=>m.position.set(0,0,0));select(-1);iso=false;$("iso").classList.remove("on");setFocus(false);apply()}
+$("rst").onclick=$("rst2").onclick=reset;
+$("ex").oninput=e=>{ex=e.target.value/100;meshes.forEach(m=>m.position.copy(m.userData.c).sub(center).multiplyScalar(ex*1.3));if(focused)setFocus(true)};
+$("br").value=U.dim.value*100;$("br").oninput=e=>{U.dim.value=e.target.value/100;st.set("dim",U.dim.value)};
+$("beam").textContent=U.beam.value?"ON":"OFF";$("beam").classList.toggle("on",!!U.beam.value);$("beam").onclick=e=>{U.beam.value=U.beam.value?0:1;e.currentTarget.textContent=U.beam.value?"ON":"OFF";e.currentTarget.classList.toggle("on",!!U.beam.value);st.set("beam",U.beam.value)};
+document.querySelectorAll("[data-q]").forEach(b=>{b.classList.toggle("on",+b.dataset.q===Q);b.onclick=()=>{Q=+b.dataset.q;st.set("q",Q);renderer.setPixelRatio(Math.min(Q,devicePixelRatio||1));fit();document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b))}});
+let tab=-1;function sheet(t){tab=(t===tab||t<0)?-1:t;$("sheet").classList.toggle("on",tab>=0);document.querySelectorAll("#dock .b").forEach(b=>b.classList.toggle("on",+b.dataset.t===tab));if(tab>=0)document.querySelectorAll(".pane").forEach((p,i)=>p.classList.toggle("on",i===tab))}
+document.querySelectorAll("#dock .b").forEach(b=>b.onclick=()=>sheet(+b.dataset.t));
+function fit(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();base=Math.max(3.1,(1.95/(2*Math.tan(16*Math.PI/180)))/Math.min(1,cam.aspect*1.7)*1.12);if(!focused){distG=base}}
+new ResizeObserver(fit).observe(host);
+const ptr=new Map();let moved=0,pd=0;const el=renderer.domElement;
+el.onpointerdown=e=>{el.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;if(ptr.size===2){const [a,b]=[...ptr.values()];pd=Math.hypot(a.x-b.x,a.y-b.y)}};
+el.onpointermove=e=>{const p=ptr.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;moved+=Math.abs(dx)+Math.abs(dy);p.x=e.clientX;p.y=e.clientY;
+if(ptr.size===1){yaw+=dx*.009;pitch=Math.max(-1.3,Math.min(1.3,pitch+dy*.006))}else if(ptr.size===2){const [a,b]=[...ptr.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(pd)distG=Math.max(.3,Math.min(8,distG*pd/d));pd=d}};
+el.onpointerup=el.onpointercancel=e=>{const wasOne=ptr.size===1;ptr.delete(e.pointerId);if(wasOne&&moved<8&&e.type==="pointerup"){const r=el.getBoundingClientRect(),rc=new T.Raycaster();rc.setFromCamera(new T.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height*2-1)),cam);const h=rc.intersectObjects(meshes.filter(m=>m.visible),false)[0];if(h){select(meshes.indexOf(h.object))}else{select(-1);sheet(-1)}}};
+el.onwheel=e=>{e.preventDefault();distG=Math.max(.3,Math.min(8,distG*(e.deltaY<0?.92:1.08)))};
+const rings=new T.Group();scene.add(rings);
+function makeRings(y){for(let r=.3;r<1.3;r+=.22){const p=[];for(let a=0;a<=96;a++)p.push(new T.Vector3(Math.cos(a/96*6.2832)*r,y,Math.sin(a/96*6.2832)*r));rings.add(new T.LineLoop(new T.BufferGeometry().setFromPoints(p),new T.LineBasicMaterial({color:0x00e5ff,transparent:true,opacity:.55-r*.3,blending:T.AdditiveBlending})))}}
+let last=0;function loop(now){requestAnimationFrame(loop);const t=now/1000,dt=Math.min(.05,(now-last)/1000);last=now;if(spin&&!ptr.size)yaw+=dt*.25;
+pivot.rotation.y=yaw;U.t.value=t;U.scan.value=-1+((t*.35)%1.25)*1.9;
+if(ready){inner.position.lerp(goal,.14);dist+=(distG-dist)*.14;rings.visible=!focused}
+cam.position.set(0,Math.sin(pitch)*dist,Math.cos(pitch)*dist);cam.lookAt(0,0,0);renderer.render(scene,cam)}
+async function boot(){
+$("bt").textContent="LOADING ATLAS";
+META=await (await fetch("meta.json")).json();
+const resp=await fetch("atlas.dat");let b;
+if(resp.body&&resp.body.getReader){const rd=resp.body.getReader();b=new Uint8Array(META.size);let got=0;for(;;){const r=await rd.read();if(r.done)break;b.set(r.value,got);got+=r.value.length;$("bar").style.width=(got/META.size*35)+"%"}}else b=new Uint8Array(await resp.arrayBuffer());
+const nP=META.nP,nI=META.nI,P=new Uint16Array(nP),I=new Uint16Array(nI);
+for(let i=0;i<nP;i++)P[i]=b[i]|(b[nP+i]<<8);const o=2*nP;for(let i=0;i<nI;i++)I[i]=b[o+i]|(b[o+nI+i]<<8);
+const parts=META.parts;let mn=[9,9,9],mx=[-9,-9,-9];parts.forEach(p=>{for(let k=0;k<3;k++){mn[k]=Math.min(mn[k],p[3][k]);mx[k]=Math.max(mx[k],p[4][k])}});
+center.set((mn[0]+mx[0])/2,(mn[1]+mx[1])/2,(mn[2]+mx[2])/2);inner.position.copy(center).multiplyScalar(-1);goal.copy(inner.position);makeRings(mn[1]-center.y);fit();dist=distG=base;
+let pv=0,iv=0,k=0;$("bt").textContent="BUILDING MESHES";
+await new Promise(res=>{function step(){const end=Math.min(parts.length,k+40);for(;k<end;k++){const [name,s,id,lo,hi,vc,ic]=parts[k];
+const pos=new Float32Array(vc*3);for(let j=0;j<vc*3;j++){const a=j%3;pos[j]=lo[a]+P[pv+j]/65535*(hi[a]-lo[a])}
+const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(pos,3));g.setIndex(new T.BufferAttribute(I.slice(iv,iv+ic),1));g.computeVertexNormals();pv+=vc*3;iv+=ic;
+const m=new T.Mesh(g,mats[s]);m.visible=!!vis[s];m.userData={name,s,id,lo,hi,c:new T.Vector3((lo[0]+hi[0])/2,(lo[1]+hi[1])/2,(lo[2]+hi[2])/2)};inner.add(m);meshes.push(m);sysCount[s]++}
+$("bar").style.width=(35+k/parts.length*65)+"%";$("st").textContent=k+" / "+parts.length;k<parts.length?setTimeout(step,0):res()}step()});
+ready=true;renderSys();pre();list();$("st").textContent=parts.length+" MESHES";$("boot").style.opacity=0;setTimeout(()=>$("boot").remove(),700);setTimeout(()=>toast("Drag · pinch · tap a part"),800)}
+fit();requestAnimationFrame(loop);boot().catch(e=>{$("bt").textContent="ERROR: "+e.message});
+try{if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js")}catch(e){}
+}
+</script>
+<script>
+(function(){var ua=navigator.userAgent,ios=/iP(hone|ad|od)/.test(ua)||(/Mac/.test(ua)&&navigator.maxTouchPoints>1),and=/Android/i.test(ua);
+var sa=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: minimal-ui)").matches;
+var dev=/[#?&]dev\b/.test(location.href);
+if(sa||dev){start();return}
+var g=document.getElementById("gate"),gp=document.getElementById("gp"),gs=document.getElementById("gs");g.style.display="flex";
+var inapp=/FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok|MicroMessenger/i.test(ua);
+function steps(a){gs.innerHTML=a.map(function(s,i){return "<li><b>"+(i+1)+"</b><span>"+s+"</span></li>"}).join("")}
+if(ios){gp.textContent=inapp?"This app can only be installed from Safari. Open this page in Safari first.":"This app only opens as an app on your phone. Add it to your Home Screen to continue.";
+steps(["Tap the <span class='sh'>Share</span> button (square with an arrow) at the bottom of Safari. If you can’t see it, tap the ••• first.","Scroll down and tap <b style='color:#fff'>Add to Home Screen</b>.","Tap <b style='color:#fff'>Add</b>, then open the 🍓 from your Home Screen. Do the first launch on Wi-Fi."])}
+else if(and){gp.textContent="This app only opens as an app on your phone. Install it to continue.";steps(["Tap <b style='color:#fff'>Install app</b> below, or the ⋮ menu → <b style='color:#fff'>Install app / Add to Home screen</b>.","Open the 🍓 from your Home Screen. Do the first launch on Wi-Fi."]);
+var dp;addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;var b=document.getElementById("gi");b.style.display="inline-block";b.onclick=function(){dp.prompt()}})}
+else{gp.textContent="This app is made for phones. Open this page on your iPhone or Android and add it to the Home Screen.";gs.innerHTML=""}
+})();
+</script>
+</body>
+</html>
